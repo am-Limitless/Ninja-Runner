@@ -9,35 +9,46 @@ namespace NinjaRunner.Player
     [RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField]
-        private float intialPlayerSpeed = 4f;
-        [SerializeField]
-        private float maximumPlayerSpeed = 30f;
-        [SerializeField]
-        private float playerSppedIncreaseRate = 0.1f;
-        [SerializeField]
-        private float jumpHeight = 1.0f;
-        [SerializeField]
-        private float intialGravityValue = -9.81f;
-        [SerializeField]
-        private LayerMask groundLayer;
-        [SerializeField]
-        private LayerMask turnLayer;
-        [SerializeField]
-        private LayerMask obstacleLayer;
-        [SerializeField]
-        private LayerMask collectLayer;
-        [SerializeField]
-        private AnimationClip slideAnimationClip;
-        [SerializeField]
-        private AnimationClip jumpAnimationClip;
-        [SerializeField]
-        private float playerSpeed;
-        [SerializeField]
-        private float sideMovementSpeed = 4f; // Speed for side movement
-        private float horizontalInput; // Store horizontal input
+        #region Serialized Fields
 
+        [Header("Player Movement Settings")]
+        [SerializeField] private float intialPlayerSpeed = 4f;
+        [SerializeField] private float maximumPlayerSpeed = 30f;
+        [SerializeField] private float playerSppedIncreaseRate = 0.1f;
+        [SerializeField] private float sideMovementSpeed = 4f;
+        [SerializeField] private float jumpHeight = 1.0f;
+        [SerializeField] private float intialGravityValue = -9.81f;
+
+        [Header("Layer Masks")]
+        [SerializeField] private LayerMask groundLayer;
+        [SerializeField] private LayerMask turnLayer;
+        [SerializeField] private LayerMask obstacleLayer;
+        [SerializeField] private LayerMask collectLayer;
+
+        [Header("Animation Clips")]
+        [SerializeField] private AnimationClip slideAnimationClip;
+        [SerializeField] private AnimationClip jumpAnimationClip;
+
+        [Header("Boundary Settings")]
+        public float internalLeft = -3.3f;
+        public float internalRight = 3.3f;
+
+        [Header("Audio Settings")]
+        [SerializeField] AudioClip coinCollectSound;
+
+        [Header("Game Events")]
+        [SerializeField] private UnityEvent<Vector3> turnEvent;
+        [SerializeField] private UnityEvent<int> gameOverEvent;
+        [SerializeField] private UnityEvent<int> scoreUpdateEvent;
+
+        #endregion
+
+        #region Private Fields
+
+        private float playerSpeed;
         private float gravity;
+        private float horizontalInput;
+
         private Vector3 movementDirection = Vector3.forward;
         private Vector3 playerVelocity;
 
@@ -59,18 +70,7 @@ namespace NinjaRunner.Player
 
         private int score = 0;
 
-        public float internalLeft = -3.3f;
-        public float internalRight = 3.3f;
-
-        [SerializeField]
-        private AudioClip coinCollectSound;
-
-        [SerializeField]
-        private UnityEvent<Vector3> turnEvent;
-        [SerializeField]
-        private UnityEvent<int> gameOverEvent;
-        [SerializeField]
-        private UnityEvent<int> scoreUpdateEvent;
+        #endregion
 
 
         private void Awake()
@@ -303,11 +303,6 @@ namespace NinjaRunner.Player
             {
                 GameOver();
             }
-
-            //if (((1 << hit.collider.gameObject.layer) & collectLayer) != 0)
-            //{
-            //    ScoreManager();
-            //}
         }
 
         private void OnTriggerEnter(Collider other)

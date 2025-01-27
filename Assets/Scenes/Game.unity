@@ -648,7 +648,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -985,6 +985,7 @@ MonoBehaviour:
   intialPlayerSpeed: 4
   maximumPlayerSpeed: 30
   playerSppedIncreaseRate: 0.1
+  sideMovementSpeed: 4
   jumpHeight: 1
   intialGravityValue: -9.81
   groundLayer:
@@ -1001,8 +1002,6 @@ MonoBehaviour:
     m_Bits: 256
   slideAnimationClip: {fileID: 7400000, guid: 17ff958241c65e84a8543e31751743ee, type: 2}
   jumpAnimationClip: {fileID: 7400000, guid: fda5dbe9ae9ea154d98c2e397ea09540, type: 2}
-  playerSpeed: 0
-  sideMovementSpeed: 4
   internalLeft: -3.3
   internalRight: 3.3
   coinCollectSound: {fileID: 8300000, guid: ddb1e84d42f1ebd479101d101a613b74, type: 3}
