@@ -49,6 +49,7 @@ namespace NinjaRunner.Player
 
         private CharacterController characterController;
         private Animator animator;
+        private AudioSource audioSource;
 
         private int slidingAnimationId;
         private int jumpAnimationId;
@@ -62,17 +63,22 @@ namespace NinjaRunner.Player
         public float internalRight = 3.3f;
 
         [SerializeField]
+        private AudioClip coinCollectSound;
+
+        [SerializeField]
         private UnityEvent<Vector3> turnEvent;
         [SerializeField]
         private UnityEvent<int> gameOverEvent;
         [SerializeField]
         private UnityEvent<int> scoreUpdateEvent;
 
+
         private void Awake()
         {
             playerInput = GetComponent<PlayerInput>();
             characterController = GetComponent<CharacterController>();
             animator = GetComponentInChildren<Animator>();
+            audioSource = GetComponent<AudioSource>();
 
             slidingAnimationId = Animator.StringToHash("Running Slide");
             jumpAnimationId = Animator.StringToHash("Running Forward Flip");
@@ -116,20 +122,24 @@ namespace NinjaRunner.Player
 
         private void PlayerTurn(InputAction.CallbackContext context)
         {
-
+            float turnValue = context.ReadValue<float>();
             Vector3? turnPosition = CheckTurn(context.ReadValue<float>());
+
+            // Debug log to check the turn position
             if (!turnPosition.HasValue)
             {
+                Debug.LogWarning("Turn position is null. Game Over.");
                 GameOver();
                 return;
             }
 
-            Vector3 targetDirection = Quaternion.AngleAxis(90 * context.ReadValue<float>(), Vector3.up) *
-                movementDirection;
+            Vector3 targetDirection = Quaternion.AngleAxis(90 * turnValue, Vector3.up) * movementDirection;
 
             turnEvent.Invoke(targetDirection);
+            Turn(turnValue, turnPosition.Value);
 
-            Turn(context.ReadValue<float>(), turnPosition.Value);
+            // Update movement direction after turning
+            movementDirection = transform.forward.normalized;
         }
 
         private Vector3? CheckTurn(float turnValue)
@@ -202,7 +212,7 @@ namespace NinjaRunner.Player
         {
             jumping = true;
             animator.Play(jumpAnimationId);
-            yield return new WaitForSeconds(jumpAnimationClip.length + 1f);
+            yield return new WaitForSeconds(jumpAnimationClip.length);
             jumping = false;
         }
 
@@ -212,6 +222,13 @@ namespace NinjaRunner.Player
             {
                 GameOver();
                 return;
+            }
+
+            // Gradually increase player speed
+            if (playerSpeed < maximumPlayerSpeed)
+            {
+                playerSpeed += playerSppedIncreaseRate * Time.deltaTime; // Increase speed over time
+                gravity = intialGravityValue - playerSpeed;
             }
 
             characterController.Move(transform.forward * playerSpeed * Time.deltaTime);
@@ -233,8 +250,12 @@ namespace NinjaRunner.Player
 
         private void MoveSideways()
         {
-            // Calculate the new position based on horizontal input
-            Vector3 sideMovement = new Vector3(horizontalInput * sideMovementSpeed * Time.deltaTime, 0, 0);
+            if (!characterController.enabled)
+            {
+                return;
+            }
+            // Calculate the new position based on horizontal input using the character's right direction
+            Vector3 sideMovement = transform.right * horizontalInput * sideMovementSpeed * Time.deltaTime;
             characterController.Move(sideMovement);
         }
 
@@ -243,7 +264,7 @@ namespace NinjaRunner.Player
             // Check if the player is outside the level boundaries
             if (transform.position.x < internalLeft || transform.position.x > internalRight)
             {
-                GameOver();
+                //GameOver();
             }
         }
 
@@ -283,10 +304,27 @@ namespace NinjaRunner.Player
                 GameOver();
             }
 
-            if (((1 << hit.collider.gameObject.layer) & collectLayer) != 0)
+            //if (((1 << hit.collider.gameObject.layer) & collectLayer) != 0)
+            //{
+            //    ScoreManager();
+            //}
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("Coin"))
             {
-                GameOver();
+                ScoreManager();
             }
+        }
+
+        public void ScoreManager()
+        {
+            score++;
+            scoreUpdateEvent.Invoke(score);
+            audioSource.clip = coinCollectSound;
+            audioSource.Play();
+
         }
     }
 }

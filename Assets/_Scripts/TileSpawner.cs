@@ -37,11 +37,13 @@ namespace NinjaRunner
 
             for (int i = 0; i < tileStartCount; i++)
             {
-                SpawnTile(startingTilePrefab.GetComponent<Tile>(), true);
+                SpawnTile(startingTilePrefab.GetComponent<Tile>());
             }
 
             SpawnTile(SelectRandomGameObjectFromList(turnTilePrefabs).GetComponent<Tile>());
 
+            // Start the coroutine to spawn obstacles after a delay
+            StartCoroutine(SpawnObstaclesAfterDelay(10f));
         }
 
         private void SpawnTile(Tile tile, bool spawnObstacle = false)
@@ -67,9 +69,23 @@ namespace NinjaRunner
             }
         }
 
+        private IEnumerator SpawnObstaclesAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            while (true) // Keep spawning obstacles indefinitely
+            {
+                SpawnObstacle();
+                yield return new WaitForSeconds(2f); // Adjust the delay between obstacle spawns as needed
+            }
+        }
+
         private void SpawnCoin()
         {
-            Vector3 coinPosition = prevTile.transform.position + new Vector3(0, 2, 0); // Adjust the height as needed
+            // Generate random offsets for X and Y
+            float randomXOffset = Random.Range(-1.5f, 1.5f);
+            float randomYOffset = Random.Range(1f, 3f);
+
+            Vector3 coinPosition = prevTile.transform.position + new Vector3(randomXOffset, randomYOffset, 0);
             Instantiate(coinPrefab, coinPosition, Quaternion.identity);
         }
 
@@ -106,9 +122,17 @@ namespace NinjaRunner
             // Define a minimum distance to avoid overlapping obstacles
             float minimumDistance = 1.0f;
 
+            // Check if the previous tile is a turn tile
+            Tile prevTileComponent = prevTile.GetComponent<Tile>();
+            if (prevTileComponent != null && prevTileComponent.type == TileType.LEFT || prevTileComponent.type == TileType.RIGHT)
+            {
+                // Skip spawning obstacles on turn tiles
+                return;
+            }
+
             foreach (GameObject tile in currentTiles)
             {
-                if (Random.value > 0.2f) return;
+                if (Random.value > 0.5f) return;
 
                 Vector3 obstaclePosition = prevTile.transform.position;
                 GameObject obstaclePrefab = SelectRandomGameObjectFromList(obstaclesPrefabs);

@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Coin : MonoBehaviour
 {
-    public float rotationSpeed = 100f;
-
+    [SerializeField]
+    private float rotationSpeed = 100f;
     private void Update()
     {
         // Rotate the coin
@@ -15,8 +15,8 @@ public class Coin : MonoBehaviour
         // Check if the player collected the coin
         if (other.CompareTag("Player"))
         {
-            // Add your coin collection logic here (e.g., increase score)
-            Destroy(gameObject); // Destroy the coin after collection
+            //playerController.ScoreManager();
+            Destroy(gameObject);
         }
     }
 }
