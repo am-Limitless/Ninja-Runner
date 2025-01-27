@@ -26,11 +26,14 @@ namespace NinjaRunner.Player
         [SerializeField]
         private LayerMask obstacleLayer;
         [SerializeField]
+        private LayerMask collectLayer;
+        [SerializeField]
         private AnimationClip slideAnimationClip;
         [SerializeField]
         private AnimationClip jumpAnimationClip;
-
+        [SerializeField]
         private float playerSpeed;
+
         private float gravity;
         private Vector3 movementDirection = Vector3.forward;
         private Vector3 playerVelocity;
@@ -49,8 +52,14 @@ namespace NinjaRunner.Player
         private bool sliding = false;
         private bool jumping = false;
 
+        private int score = 0;
+
         [SerializeField]
         private UnityEvent<Vector3> turnEvent;
+        [SerializeField]
+        private UnityEvent<int> gameOverEvent;
+        [SerializeField]
+        private UnityEvent<int> scoreUpdateEvent;
 
         private void Awake()
         {
@@ -186,6 +195,9 @@ namespace NinjaRunner.Player
                 return;
             }
 
+            // Score functionality
+
+
             characterController.Move(transform.forward * playerSpeed * Time.deltaTime);
 
             if (IsGrounded() && playerVelocity.y < 0)
@@ -195,6 +207,11 @@ namespace NinjaRunner.Player
 
             playerVelocity.y += gravity * Time.deltaTime;
             characterController.Move(playerVelocity * Time.deltaTime);
+        }
+
+        private void PlayerScore()
+        {
+
         }
 
         private bool IsGrounded(float length = 0.2f)
@@ -222,11 +239,18 @@ namespace NinjaRunner.Player
         private void GameOver()
         {
             Debug.Log("Game Over");
+            gameOverEvent.Invoke(score);
+            gameObject.SetActive(false);
         }
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
             if (((1 << hit.collider.gameObject.layer) & obstacleLayer) != 0)
+            {
+                GameOver();
+            }
+
+            if (((1 << hit.collider.gameObject.layer) & collectLayer) != 0)
             {
                 GameOver();
             }
