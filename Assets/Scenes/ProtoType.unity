@@ -861,7 +861,6 @@ MonoBehaviour:
   turnTilePrefabs:
   - {fileID: 3504972824814534260, guid: 57a0c77d40fb7f64f88c73e669bd75d0, type: 3}
   - {fileID: 3109650500946958552, guid: d1bc38dd49605864690bd11be3a4da2a, type: 3}
-  - {fileID: 5635246150992067340, guid: 406d087854fa4cf4ba1b09b5571e98e9, type: 3}
   obstaclesPrefabs:
   - {fileID: 1887772381221813489, guid: 7acef6c3f1b5d6f45b162045d394132f, type: 3}
   - {fileID: 7602181854675208719, guid: 155f450bb33de2c4f96d377dba80b194, type: 3}
