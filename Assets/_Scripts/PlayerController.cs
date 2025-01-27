@@ -33,12 +33,16 @@ namespace NinjaRunner.Player
         private AnimationClip jumpAnimationClip;
         [SerializeField]
         private float playerSpeed;
+        [SerializeField]
+        private float sideMovementSpeed = 4f; // Speed for side movement
+        private float horizontalInput; // Store horizontal input
 
         private float gravity;
         private Vector3 movementDirection = Vector3.forward;
         private Vector3 playerVelocity;
 
         private PlayerInput playerInput;
+        private InputAction moveAction;
         private InputAction turnAction;
         private InputAction jumpAction;
         private InputAction slideAction;
@@ -53,6 +57,9 @@ namespace NinjaRunner.Player
         private bool jumping = false;
 
         private int score = 0;
+
+        public float internalLeft = -3.3f;
+        public float internalRight = 3.3f;
 
         [SerializeField]
         private UnityEvent<Vector3> turnEvent;
@@ -73,6 +80,7 @@ namespace NinjaRunner.Player
             turnAction = playerInput.actions["Turn"];
             jumpAction = playerInput.actions["Jump"];
             slideAction = playerInput.actions["Slide"];
+            moveAction = playerInput.actions["Move"];
         }
 
         private void OnEnable()
@@ -80,6 +88,8 @@ namespace NinjaRunner.Player
             turnAction.performed += PlayerTurn;
             slideAction.performed += PlayerSlide;
             jumpAction.performed += PlayerJump;
+            moveAction.performed += PlayerMove;
+            moveAction.canceled += PlayerMove;
         }
 
         private void OnDisable()
@@ -87,6 +97,7 @@ namespace NinjaRunner.Player
             turnAction.performed -= PlayerTurn;
             slideAction.performed -= PlayerSlide;
             jumpAction.performed -= PlayerJump;
+            moveAction.performed -= PlayerMove;
         }
 
         private void Start()
@@ -94,6 +105,14 @@ namespace NinjaRunner.Player
             playerSpeed = intialPlayerSpeed;
             gravity = intialGravityValue;
         }
+
+        private void PlayerMove(InputAction.CallbackContext context)
+        {
+            // Read the horizontal input as a Vector2
+            Vector2 input = context.ReadValue<Vector2>();
+            horizontalInput = input.x; // Store the x value for sideways movement
+        }
+
 
         private void PlayerTurn(InputAction.CallbackContext context)
         {
@@ -195,9 +214,6 @@ namespace NinjaRunner.Player
                 return;
             }
 
-            // Score functionality
-
-
             characterController.Move(transform.forward * playerSpeed * Time.deltaTime);
 
             if (IsGrounded() && playerVelocity.y < 0)
@@ -207,11 +223,28 @@ namespace NinjaRunner.Player
 
             playerVelocity.y += gravity * Time.deltaTime;
             characterController.Move(playerVelocity * Time.deltaTime);
+
+            // Handle side movement
+            MoveSideways();
+
+            // Check if the player is within the boundaries
+            CheckBoundaries();
         }
 
-        private void PlayerScore()
+        private void MoveSideways()
         {
+            // Calculate the new position based on horizontal input
+            Vector3 sideMovement = new Vector3(horizontalInput * sideMovementSpeed * Time.deltaTime, 0, 0);
+            characterController.Move(sideMovement);
+        }
 
+        private void CheckBoundaries()
+        {
+            // Check if the player is outside the level boundaries
+            if (transform.position.x < internalLeft || transform.position.x > internalRight)
+            {
+                GameOver();
+            }
         }
 
         private bool IsGrounded(float length = 0.2f)

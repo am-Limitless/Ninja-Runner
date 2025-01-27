@@ -18,6 +18,8 @@ namespace NinjaRunner
         private List<GameObject> turnTilePrefabs;
         [SerializeField]
         private List<GameObject> obstaclesPrefabs;
+        [SerializeField]
+        private GameObject coinPrefab;
 
         private Vector3 currentTileLocation = Vector3.zero;
         private Vector3 currentTileDirection = Vector3.forward;
@@ -53,11 +55,22 @@ namespace NinjaRunner
             {
                 SpawnObstacle();
             }
+            // Spawn a coin with a certain probability
+            if (Random.value < 0.5f) // 50% chance to spawn a coin
+            {
+                SpawnCoin();
+            }
 
             if (tile.type == TileType.STRAIGHT)
             {
                 currentTileLocation += Vector3.Scale(prevTile.GetComponent<Renderer>().bounds.size, currentTileDirection);
             }
+        }
+
+        private void SpawnCoin()
+        {
+            Vector3 coinPosition = prevTile.transform.position + new Vector3(0, 2, 0); // Adjust the height as needed
+            Instantiate(coinPrefab, coinPosition, Quaternion.identity);
         }
 
         public void AddNewDirection(Vector3 direction)
